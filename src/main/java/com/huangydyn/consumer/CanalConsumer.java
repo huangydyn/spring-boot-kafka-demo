@@ -6,9 +6,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.stereotype.Component;
 
-@Component
+//@Component
 public class CanalConsumer {
 
     private Logger log = LoggerFactory.getLogger(CanalConsumer.class);
@@ -20,7 +19,7 @@ public class CanalConsumer {
     }
 
     //监听的队列名称为：canaltopic
-    @KafkaListener(topics = "canal_mysql", group = "mysql_consumer")
+    @KafkaListener(topics = "canal_mysql", groupId = "mysql_consumer")
     public void receive(ConsumerRecord<?, ?> consumer) throws Exception {
         String value = (String) consumer.value();
         log.info("topic名称:{},key:{},分区位置:{},下标:{},value:{}", consumer.topic(), consumer.key(),

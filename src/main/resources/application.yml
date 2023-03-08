@@ -1,0 +1,13 @@
+log4j:
+  rootLogger: INFO, stdout
+logging:
+  level:
+    com:
+      huangydyn: debug
+    org:
+      springframework:
+        web: info
+    root: WARN
+spring:
+  profiles:
+    active: local

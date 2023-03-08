@@ -6,34 +6,40 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Component
 public class KafkaProducer {
-    private static final String TOPIC = "test";
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd hh:mm:ss");
+
+    private static final String TOPIC = "haley_topic";
+
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
+            "yyyyMMdd hh:mm:ss");
+
     private Logger logger = LoggerFactory.getLogger(KafkaProducer.class);
+
     @Autowired
-    private KafkaTemplate kafkaTemplate;
+    private KafkaTemplate<String, Object> kafkaTemplate;
+
     @Autowired
     private ObjectMapper objectMapper;
 
-    int i = 0;
+    int key = 0;
 
-    //@Scheduled(fixedDelay = 5 * 1000)
+    @Scheduled(fixedDelay = 3 * 1000)
     public void sendMessage() throws Exception {
         Message msg = new Message();
-        msg.setId(String.valueOf(i));
-        i++;
+        msg.setId(String.valueOf(key));
         msg.setMsg("Hi Spring Kafka");
         msg.setSendTime(LocalDateTime.now().format(formatter));
 
-        ListenableFuture future = kafkaTemplate.send(TOPIC, objectMapper.writeValueAsString(msg));
-
-        future.addCallback(o -> logger.info("send-message success：" + msg.toString()), throwable -> logger.info("send-message failed" + throwable.getMessage()));
+        kafkaTemplate.send(TOPIC, String.valueOf(key), objectMapper.writeValueAsString(msg))
+                .addCallback(o -> logger.info("[Producer] send-message success：" + msg),
+                        throwable -> logger.error("[Producer] send-message failed", throwable));
+        key++;
     }
 }

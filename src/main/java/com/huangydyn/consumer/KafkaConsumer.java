@@ -15,7 +15,7 @@ import java.util.Optional;
 @Component
 public class KafkaConsumer {
 
-    private static final String TOPIC = "test";
+    private static final String TOPIC = "haley_topic";
 
     private Logger logger = LoggerFactory.getLogger(KafkaProducer.class);
 
@@ -25,22 +25,17 @@ public class KafkaConsumer {
         this.objectMapper = objectMapper;
     }
 
-    @KafkaListener(topics = {TOPIC}, group = "group_test")
-    public void listenTest(ConsumerRecord<?, ?> record, Acknowledgment acknowledgment) throws Exception {
+    @KafkaListener(topics = {TOPIC}, groupId = "gp_01")
+    public void listenTest(ConsumerRecord<?, ?> record,
+                           Acknowledgment acknowledgment) throws Exception {
         Optional<?> kafkaMessage = Optional.ofNullable(record.value());
         if (kafkaMessage.isPresent()) {
             Object content = kafkaMessage.get();
             Message msg = objectMapper.readValue(content.toString(), Message.class);
-            logger.info("receive msg, offset {},body {}", record.offset(), msg.toString());
-            // 测试消费失败后消息丢失
-            if (msg.getId().equals("3")) {
-                throw new RuntimeException("failed");
-            }
-            logger.info("commit msg successful, offset {}", record.offset());
+            logger.info("[Consumer] receive msg, offset {},body {}", record.offset(),
+                    msg.toString());
             acknowledgment.acknowledge();
         }
     }
-
-
 }
 
